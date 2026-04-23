@@ -1,0 +1,905 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+
+:root {
+  --sakura: #f7c5d0;
+  --sakura-deep: #e8829a;
+  --sakura-dark: #c05070;
+  --gold: #d4a843;
+  --gold-light: #f5e6b8;
+  --cream: #fdf6ee;
+  --ink: #2a1a2e;
+  --ink-soft: #4a3a4e;
+  --mist: #e8dff0;
+  --stage: #1a0a2e;
+  --spotlight: #fff8e7;
+  --clue-gold: #b8860b;
+  --easy-bg: #fce8f0;
+  --easy-accent: #e8829a;
+  --hard-bg: #e8e0f8;
+  --hard-accent: #7c5cbf;
+  --done-easy: #d4edda;
+  --done-hard: #cce0ff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+#app { max-width: 680px; margin: 0 auto; padding: 0; }
+
+/* ===== TITLE SCREEN ===== */
+#screen-title {
+  min-height: 420px;
+  background: var(--stage);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px 24px;
+  position: relative;
+  overflow: hidden;
+}
+#screen-title::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(247,197,208,0.18) 0%, transparent 70%);
+}
+.title-petal {
+  position: absolute; font-size: 20px; opacity: 0.18;
+  animation: drift 8s infinite ease-in-out;
+}
+@keyframes drift {
+  0%,100%{transform:translateY(0) rotate(0deg);}
+  50%{transform:translateY(-12px) rotate(15deg);}
+}
+.title-en {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 11px; letter-spacing: 5px; color: var(--sakura); opacity: 0.8;
+  text-transform: uppercase; margin-bottom: 16px; position: relative;
+}
+.title-jp {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 26px; font-weight: 700; color: #fff;
+  line-height: 1.3; text-align: center; position: relative; margin-bottom: 6px;
+}
+.title-sub {
+  font-size: 12px; color: var(--sakura); opacity: 0.7;
+  letter-spacing: 2px; position: relative; margin-bottom: 28px;
+}
+.title-start-btn {
+  padding: 11px 32px; border: 1.5px solid var(--sakura-deep);
+  background: transparent; color: var(--sakura);
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-size: 14px; letter-spacing: 2px; cursor: pointer;
+  position: relative; transition: all 0.3s;
+}
+.title-start-btn:hover { background: rgba(247,197,208,0.12); color: #fff; }
+
+/* ===== SELECT SCREEN ===== */
+#screen-select { padding: 16px; display: none; }
+.select-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+}
+.select-header h1 {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 16px; font-weight: 700; color: var(--ink);
+}
+.mystery-hint {
+  font-size: 11px; color: var(--sakura-dark); background: var(--easy-bg);
+  padding: 6px 12px; border-radius: 20px; margin-bottom: 14px;
+  border-left: 3px solid var(--sakura-deep);
+}
+.chapter-row {
+  background: #fff; border-radius: 12px; border: 1px solid rgba(232,130,154,0.2);
+  padding: 12px; margin-bottom: 10px; transition: box-shadow 0.2s;
+}
+.chapter-row:hover:not(.chapter-locked) { box-shadow: 0 2px 12px rgba(232,130,154,0.13); }
+.chapter-row.chapter-locked {
+  background: #f7f7f7; border-color: #e0e0e0; opacity: 0.72;
+}
+.chapter-locked .ch-name { color: #aaa; }
+.chapter-locked .ch-sub { color: #bbb; }
+.chapter-lock-overlay {
+  display: flex; align-items: center; gap: 8px;
+  background: #eee; border-radius: 8px;
+  padding: 9px 14px; color: #aaa; font-size: 12px;
+  border: 1px dashed #d0d0d0;
+}
+.ch-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.ch-name {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 14px; font-weight: 600; color: var(--ink);
+}
+.ch-sub { font-size: 11px; color: var(--ink-soft); opacity: 0.7; }
+.ch-clue-badge {
+  font-size: 10px; padding: 2px 8px; border-radius: 10px;
+  background: var(--gold-light); color: var(--clue-gold);
+  border: 1px solid rgba(212,168,67,0.3);
+}
+.ch-clue-badge.locked { background: #f0f0f0; color: #aaa; border-color: #ddd; }
+.diff-row { display: flex; gap: 8px; }
+.diff-btn {
+  flex: 1; padding: 8px 0; border-radius: 8px; border: 1px solid;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-size: 12px; cursor: pointer; transition: all 0.2s;
+  position: relative; text-align: center;
+}
+.diff-btn.easy {
+  background: var(--easy-bg); border-color: rgba(232,130,154,0.4);
+  color: var(--sakura-dark);
+}
+.diff-btn.hard {
+  background: var(--hard-bg); border-color: rgba(124,92,191,0.3);
+  color: var(--hard-accent);
+}
+.diff-btn.easy:hover { background: var(--sakura); color: #fff; border-color: var(--sakura-deep); }
+.diff-btn.hard:hover { background: var(--hard-accent); color: #fff; }
+.diff-btn.done-easy {
+  background: var(--done-easy); border-color: #82c99a; color: #2d7a4f;
+}
+.diff-btn.done-hard {
+  background: var(--done-hard); border-color: #6699cc; color: #1a4d80;
+}
+.done-mark { margin-left: 4px; font-size: 12px; }
+
+/* story panel */
+.story-panel {
+  background: var(--stage); border-radius: 12px;
+  padding: 14px 16px; margin-top: 14px;
+  border: 1px solid rgba(247,197,208,0.15);
+}
+.story-panel-title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 12px; color: var(--sakura); letter-spacing: 2px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.story-panel-title::after { content:''; flex:1; height:1px; background:rgba(247,197,208,0.2); }
+.clue-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.clue-item:last-child { border-bottom: none; }
+.clue-num {
+  font-size: 10px; color: var(--gold); min-width: 20px;
+  font-family: 'Noto Serif JP', serif; padding-top: 1px;
+}
+.clue-text { font-size: 12px; color: rgba(255,255,255,0.75); line-height: 1.6; }
+.clue-locked { color: rgba(255,255,255,0.2); font-size: 12px; }
+
+/* ===== GAME SCREEN ===== */
+#screen-game { padding: 12px; display: none; }
+.game-topbar {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.back-btn {
+  padding: 5px 10px; border-radius: 20px;
+  border: 1px solid rgba(232,130,154,0.3); background: #fff;
+  color: var(--ink-soft); font-size: 12px; cursor: pointer;
+  font-family: 'Zen Maru Gothic', sans-serif;
+}
+.back-btn:hover { background: var(--easy-bg); }
+.game-ch-title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 13px; font-weight: 600; color: var(--ink); flex: 1; text-align: center;
+}
+.mode-badge {
+  font-size: 11px; padding: 3px 10px; border-radius: 12px;
+}
+.mode-badge.easy { background: var(--easy-bg); color: var(--sakura-dark); }
+.mode-badge.hard { background: var(--hard-bg); color: var(--hard-accent); }
+
+.stats-row { display: flex; gap: 6px; margin-bottom: 8px; align-items: center; }
+.stat-chip {
+  background: #fff; border: 1px solid rgba(232,130,154,0.2);
+  border-radius: 8px; padding: 4px 10px; font-size: 12px; color: var(--ink-soft);
+}
+.stat-chip b { font-weight: 600; color: var(--ink); }
+
+/* timer */
+#timer-wrap {
+  background: var(--stage); border-radius: 8px;
+  padding: 4px 12px; color: var(--gold);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 14px; font-weight: 600; display: none;
+  border: 1px solid rgba(212,168,67,0.3);
+}
+#timer-wrap.urgent { color: #ff6b6b; animation: pulse 0.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+
+.progress-bar { height: 3px; background: rgba(232,130,154,0.15); border-radius: 2px; margin-bottom: 8px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--sakura-deep), var(--gold)); border-radius: 2px; transition: width 0.4s; }
+
+.info-bar {
+  font-size: 12px; color: var(--ink-soft); margin-bottom: 8px;
+  min-height: 18px; line-height: 1.5;
+  padding: 0 4px;
+}
+.info-bar.ok { color: #2d7a4f; font-weight: 600; }
+.info-bar.bad { color: var(--sakura-dark); font-weight: 600; }
+.info-bar.hint { color: var(--hard-accent); }
+
+/* tray */
+#tray {
+  display: flex; gap: 5px; min-height: 52px;
+  background: rgba(232,130,154,0.06);
+  border: 1px dashed rgba(232,130,154,0.3);
+  border-radius: 10px; padding: 7px 8px;
+  margin-bottom: 10px; flex-wrap: wrap; align-items: flex-start;
+}
+.tray-label { font-size: 10px; color: rgba(74,58,78,0.45); width: 100%; margin-bottom: 3px; }
+.tray-card {
+  padding: 5px 10px; border-radius: 7px; font-size: 13px; font-weight: 600;
+  animation: popIn 0.18s ease; cursor: default;
+  font-family: 'Noto Serif JP', serif;
+}
+.tray-card.easy-card { background: var(--sakura); color: var(--ink); border: 1px solid rgba(232,130,154,0.5); }
+.tray-card.jp { background: #EEEDFE; color: #3C3489; border: 1px solid #AFA9EC; }
+.tray-card.kana { background: #E6F1FB; color: #185FA5; border: 1px solid #85B7EB; }
+.tray-card.cn { background: #EAF3DE; color: #3B6D11; border: 1px solid #97C459; }
+@keyframes popIn { from{transform:scale(0.5);opacity:0;} to{transform:scale(1);opacity:1;} }
+
+/* grid */
+#grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 7px;
+}
+.card {
+  border-radius: 10px; border: 1px solid rgba(232,130,154,0.2);
+  background: #fff; padding: 8px 5px;
+  min-height: 68px; display: flex; flex-direction: column;
+  justify-content: center; align-items: center; text-align: center;
+  cursor: pointer; transition: all 0.15s; position: relative;
+}
+.card:hover:not(.used):not(.locked):not(.in-tray) {
+  border-color: var(--sakura-deep);
+  box-shadow: 0 2px 10px rgba(232,130,154,0.2);
+  transform: translateY(-2px);
+}
+.card.used { opacity: 0.12; pointer-events: none; }
+.card.locked {
+  background: rgba(232,130,154,0.04);
+  cursor: not-allowed; border-color: rgba(232,130,154,0.1);
+}
+.card.in-tray { opacity: 0.35; pointer-events: none; }
+
+/* easy card display: kana big, jp+cn small */
+.card-kana-big { font-size: 16px; font-weight: 700; color: var(--ink); font-family: 'Noto Serif JP', serif; line-height: 1.2; }
+.card-jp-small { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
+.card-cn-small { font-size: 10px; color: rgba(74,58,78,0.5); margin-top: 1px; }
+
+/* hard card: just the text, no label */
+.card-hard-text { font-size: 15px; font-weight: 700; font-family: 'Noto Serif JP', serif; line-height: 1.3; }
+.card.type-jp .card-hard-text { color: #3C3489; }
+.card.type-kana .card-hard-text { color: #185FA5; }
+.card.type-cn .card-hard-text { color: #3B6D11; }
+.card.locked .lock-icon { font-size: 20px; opacity: 0.2; }
+
+/* clue unlock modal */
+#clue-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(26,10,46,0.85); z-index: 999;
+  justify-content: center; align-items: center;
+}
+#clue-modal.show { display: flex; }
+.clue-modal-box {
+  background: var(--stage); border: 1px solid rgba(247,197,208,0.25);
+  border-radius: 16px; padding: 28px 24px; max-width: 360px; width: 90%;
+  text-align: center; animation: modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modalIn { from{transform:scale(0.7) translateY(20px);opacity:0;} to{transform:scale(1);opacity:1;} }
+.clue-modal-label {
+  font-size: 10px; letter-spacing: 4px; color: var(--gold);
+  font-family: 'Noto Serif JP', serif; margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.clue-modal-num {
+  font-size: 36px; color: var(--sakura); font-family: 'Noto Serif JP', serif;
+  font-weight: 700; line-height: 1; margin-bottom: 8px;
+}
+.clue-modal-title {
+  font-size: 14px; color: var(--gold-light); margin-bottom: 14px;
+  font-family: 'Noto Serif JP', serif; font-weight: 600;
+}
+.clue-modal-text {
+  font-size: 13px; color: rgba(255,255,255,0.8);
+  line-height: 1.8; margin-bottom: 20px; text-align: left;
+}
+.clue-modal-continue {
+  padding: 9px 24px; border: 1px solid var(--sakura-deep);
+  background: transparent; color: var(--sakura);
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-size: 13px; cursor: pointer; border-radius: 20px; transition: all 0.2s;
+}
+.clue-modal-continue:hover { background: rgba(247,197,208,0.1); }
+
+/* complete / fail */
+#screen-end {
+  display: none; padding: 28px 16px; text-align: center;
+}
+.end-icon { font-size: 48px; margin-bottom: 12px; }
+.end-title { font-family: 'Noto Serif JP', serif; font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.end-sub { font-size: 13px; color: var(--ink-soft); margin-bottom: 20px; line-height: 1.6; }
+.end-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.end-btn {
+  padding: 9px 20px; border-radius: 20px;
+  border: 1px solid rgba(232,130,154,0.4);
+  background: #fff; color: var(--ink);
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-size: 13px; cursor: pointer; transition: all 0.2s;
+}
+.end-btn:hover { background: var(--easy-bg); }
+.end-btn.primary { background: var(--sakura-deep); color: #fff; border-color: var(--sakura-deep); }
+.end-btn.primary:hover { background: var(--sakura-dark); }
+
+/* final reveal */
+#screen-final { display: none; padding: 20px 16px; }
+.final-bg {
+  background: var(--stage); border-radius: 16px; padding: 24px;
+  border: 1px solid rgba(247,197,208,0.2);
+}
+.final-title {
+  font-family: 'Noto Serif JP', serif; font-size: 17px; font-weight: 700;
+  color: var(--gold); text-align: center; margin-bottom: 4px; letter-spacing: 2px;
+}
+.final-subtitle { font-size: 11px; color: var(--sakura); opacity: 0.7; text-align: center; margin-bottom: 18px; letter-spacing: 3px; }
+.final-divider { height: 1px; background: rgba(247,197,208,0.15); margin: 14px 0; }
+.final-section-title { font-size: 11px; color: var(--gold); letter-spacing: 2px; margin-bottom: 8px; font-family: 'Noto Serif JP', serif; }
+.final-text { font-size: 13px; color: rgba(255,255,255,0.82); line-height: 2; }
+.final-answer { font-size: 15px; color: var(--sakura); font-weight: 600; font-family: 'Noto Serif JP', serif; text-align: center; margin: 16px 0; line-height: 1.8; }
+
+.hint-btn-small {
+  padding: 4px 10px; border-radius: 12px;
+  border: 1px solid rgba(232,130,154,0.25); background: transparent;
+  color: rgba(74,58,78,0.6); font-size: 11px; cursor: pointer;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  margin-left: auto;
+}
+.hint-btn-small:hover { background: var(--easy-bg); }
+</style>
+
+<div id="app">
+
+<!-- title -->
+<div id="screen-title">
+  <div class="title-petal" style="top:15%;left:12%;animation-delay:0s;">🌸</div>
+  <div class="title-petal" style="top:25%;right:10%;animation-delay:2s;">✦</div>
+  <div class="title-petal" style="bottom:20%;left:20%;animation-delay:4s;">🌸</div>
+  <div class="title-petal" style="bottom:30%;right:18%;animation-delay:1.5s;">✦</div>
+  <div class="title-en">Idol Festival Mystery</div>
+  <div class="title-jp">偶像校园祭<br>失踪事件</div>
+  <div class="title-sub">— 五つの謎 —</div>
+  <button class="title-start-btn" id="title-start">开始调查</button>
+</div>
+
+<!-- select -->
+<div id="screen-select">
+  <div style="padding: 14px 14px 0;">
+    <div class="select-header">
+      <div style="font-size:20px;">🌸</div>
+      <h1>调查档案</h1>
+    </div>
+    <div class="mystery-hint" id="mystery-progress-hint">⚠ 校园祭前夜，中心偶像星宫凛香失踪——完成每一关解锁新线索</div>
+  </div>
+  <div style="padding: 0 14px;" id="chapter-list"></div>
+  <div style="padding: 0 14px 14px;">
+    <div class="story-panel" id="story-panel">
+      <div class="story-panel-title">✦ 已解锁的线索</div>
+      <div id="clue-list-panel"></div>
+    </div>
+  </div>
+</div>
+
+<!-- game -->
+<div id="screen-game">
+  <div class="game-topbar">
+    <button class="back-btn" id="back-btn">← 返回</button>
+    <span class="game-ch-title" id="game-ch-title"></span>
+    <span class="mode-badge" id="mode-badge"></span>
+  </div>
+  <div class="stats-row">
+    <div class="stat-chip">得分 <b id="score">0</b></div>
+    <div class="stat-chip">连击 <b id="combo">0</b></div>
+    <div class="stat-chip">剩余 <b id="remain">0</b></div>
+    <div id="timer-wrap">⏱ <span id="timer-val">00:00</span></div>
+    <button class="hint-btn-small" id="hint-btn">提示</button>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="info-bar" id="info-bar">收集单词牌，凑齐即可消除！</div>
+  <div id="tray"><div class="tray-label" id="tray-label">收集槽 (0/7)</div></div>
+  <div id="grid"></div>
+</div>
+
+<!-- end -->
+<div id="screen-end">
+  <div class="end-icon" id="end-icon"></div>
+  <div class="end-title" id="end-title"></div>
+  <div class="end-sub" id="end-sub"></div>
+  <div class="end-btns">
+    <button class="end-btn" id="retry-btn">重试</button>
+    <button class="end-btn" id="back-end-btn">返回关卡</button>
+    <button class="end-btn primary" id="next-btn" style="display:none">继续调查 →</button>
+  </div>
+</div>
+
+<!-- final reveal -->
+<div id="screen-final">
+  <div class="final-bg">
+    <div class="final-title">真相大白</div>
+    <div class="final-subtitle">— THE TRUTH —</div>
+    <div class="final-text" id="final-clues-summary"></div>
+    <div class="final-divider"></div>
+    <div class="final-section-title">✦ 凶手与动机</div>
+    <div class="final-answer" id="final-answer"></div>
+    <div class="final-divider"></div>
+    <div class="final-text" id="final-epilogue"></div>
+  </div>
+  <div style="text-align:center;margin-top:16px;">
+    <button class="end-btn" id="final-back-btn">返回关卡选择</button>
+  </div>
+</div>
+
+<!-- clue modal -->
+<div id="clue-modal">
+  <div class="clue-modal-box">
+    <div class="clue-modal-label">— 新线索解锁 —</div>
+    <div class="clue-modal-num" id="modal-num"></div>
+    <div class="clue-modal-title" id="modal-title"></div>
+    <div class="clue-modal-text" id="modal-text"></div>
+    <button class="clue-modal-continue" id="modal-continue">记录线索，继续调查</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const CHAPTERS = [
+  {
+    title:"第一关·家族",
+    sub:"かぞく",
+    words:[
+      {w:"父親",k:"ちちおや",cn:"父亲"},{w:"母親",k:"ははおや",cn:"母亲"},
+      {w:"長女",k:"ちょうじょ",cn:"长女"},{w:"長男",k:"ちょうなん",cn:"长子"},
+      {w:"末っ子",k:"すえっこ",cn:"最小的孩子"},{w:"一人っ子",k:"ひとりっこ",cn:"独生子女"},
+      {w:"姉妹",k:"しまい",cn:"姐妹"},{w:"夫婦",k:"ふうふ",cn:"夫妻"},
+    ]
+  },
+  {
+    title:"第二关·朋友",
+    sub:"ともだち",
+    words:[
+      {w:"親友",k:"しんゆう",cn:"知心朋友"},{w:"仲間",k:"なかま",cn:"伙伴"},
+      {w:"幼なじみ",k:"おさななじみ",cn:"发小"},{w:"友情",k:"ゆうじょう",cn:"友情"},
+      {w:"知人",k:"ちじん",cn:"熟人"},{w:"遠慮",k:"えんりょ",cn:"客气"},
+      {w:"祝う",k:"いわう",cn:"庆祝"},{w:"別々",k:"べつべつ",cn:"各自分开"},
+    ]
+  },
+  {
+    title:"第三关·恋爱",
+    sub:"こいびと",
+    words:[
+      {w:"愛情",k:"あいじょう",cn:"爱情"},{w:"出会い",k:"であい",cn:"邂逅"},
+      {w:"付き合う",k:"つきあう",cn:"交往"},{w:"記念日",k:"きねんび",cn:"纪念日"},
+      {w:"けんか",k:"けんか",cn:"吵架"},{w:"謝る",k:"あやまる",cn:"道歉"},
+      {w:"仲直り",k:"なかなおり",cn:"和好"},{w:"秘密",k:"ひみつ",cn:"秘密"},
+    ]
+  },
+  {
+    title:"第四关·交流",
+    sub:"コミュニケーション",
+    words:[
+      {w:"相手",k:"あいて",cn:"对方"},{w:"助ける",k:"たすける",cn:"帮助"},
+      {w:"支える",k:"ささえる",cn:"支持"},{w:"誘う",k:"さそう",cn:"邀请"},
+      {w:"断る",k:"ことわる",cn:"拒绝"},{w:"預ける",k:"あずける",cn:"寄存"},
+      {w:"悪口",k:"わるぐち",cn:"坏话"},{w:"無視",k:"むし",cn:"无视"},
+    ]
+  },
+  {
+    title:"第五关·人物",
+    sub:"どんな人？",
+    words:[
+      {w:"名字",k:"みょうじ",cn:"姓"},{w:"年齢",k:"ねんれい",cn:"年龄"},
+      {w:"出身",k:"しゅっしん",cn:"来自"},{w:"行儀",k:"ぎょうぎ",cn:"礼仪"},
+      {w:"独身",k:"どくしん",cn:"单身"},{w:"主婦",k:"しゅふ",cn:"主妇"},
+      {w:"個人",k:"こじん",cn:"个人"},{w:"無職",k:"むしょく",cn:"无职业"},
+    ]
+  }
+];
+
+const CLUES = [
+  {
+    mode:'easy', ci:0,
+    num:'线索 01', title:'失踪前的争吵',
+    text:'剧团后台的清洁阿姨向我透露，校园祭彩排结束后，她听到凛香与另一名女生发生激烈争吵。争吵中反复出现一个词——"家族的秘密"。阿姨说那个声音来自更衣室深处，说话的人用的是关西口音。',
+  },
+  {
+    mode:'hard', ci:0,
+    num:'线索 02', title:'神秘的信封',
+    text:'在凛香的化妆台抽屉里发现一封未拆封的信，信封上只写着「姉妹へ」（致姐妹）。字迹工整，墨水刚干，显然是当天写的。信的内容至今不明——信封本身已被人撕开，信纸却不翼而飞。',
+  },
+  {
+    mode:'easy', ci:1,
+    num:'线索 03', title:'监控录像的空白',
+    text:'调取校园祭场馆的监控录像，发现后台走廊的摄像头在失踪当晚22:15至22:45整整30分钟的画面被人为删除。负责监控室的同学矢口否认动过录像，但他的手上有一处新鲜的划伤。',
+  },
+  {
+    mode:'hard', ci:1,
+    num:'线索 04', title:'支持者的告白',
+    text:'凛香的死忠粉丝会长——三年级的水野麻衣主动找到我。她颤抖着说："凛香那天托我保管一个信封，她说如果她三天内没来取，就交给学生会。" 信封里是一张折叠的纸，上面写着一个名字和一行字：「この人だけは信用しないで」（只有这个人不要信任）。',
+  },
+  {
+    mode:'easy', ci:2,
+    num:'线索 05', title:'舞台背后的情感',
+    text:'从凛香的私人日记（学生会协助调取）中发现，她在失踪前两周频繁提到一段"不能公开的感情"。她写道："如果被发现，我们的关系就会终结。他说这是我们的秘密，但我越来越觉得，他根本不在乎我。"',
+  },
+  {
+    mode:'hard', ci:2,
+    num:'线索 06', title:'化妆室的香水',
+    text:'现场勘察时，凛香化妆台旁边留有浓烈的男性香水气味。这款香水非常特殊，是限定版的「黒薔薇」（黑玫瑰），全校只有一名男教师使用这款香水——担任偶像社团指导老师的桐岛先生。',
+  },
+  {
+    mode:'easy', ci:3,
+    num:'线索 07', title:'被拒绝的邀请',
+    text:'社团副部长透露，凛香失踪当晚曾收到一条消息，邀请她去体育馆仓库"谈谈正事"。凛香起初犹豫，但最终独自前往。发送消息的手机号码已注销，但运营商记录显示，该号码最后一次使用地点在学校教职员室附近。',
+  },
+  {
+    mode:'hard', ci:3,
+    num:'线索 08', title:'目击者现身',
+    text:'一名夜间留校练习的篮球部员工向我提供了关键证词：当晚22:20左右，他看到一名戴口罩的成年男性从体育馆仓库方向快步走出，手里提着一个大号舞台道具袋。男性见到他后立刻转身走开，走路时右腿略有跛行。',
+  },
+  {
+    mode:'easy', ci:4,
+    num:'线索 09', title:'藏在奖杯后的真相',
+    text:'依照凛香的暗示，我们在剧团荣誉展示柜中的一座奖杯底部，发现了一张折叠的纸条。上面写着："他以我父亲的债务威胁我，要我退出偶像活动，把主角位置让给他的女儿。我不会屈服。如果我失踪，请告诉警察——桐岛。"',
+  },
+  {
+    mode:'hard', ci:4,
+    num:'线索 10', title:'真相大白',
+    text:'所有线索指向同一人。桐岛先生右腿旧伤（与目击者描述吻合），香水、手机号、被删除的监控——都能对上。凛香并未遭到伤害，而是被他软禁在校外的一处仓库。接报后警方当夜展开搜救，于次日凌晨找到了安全的凛香。',
+  },
+];
+
+const FINAL = {
+  answer: `真正的幕后黑手是——\n桐岛 修一（偶像社团指导老师）\n\n动机：女儿桐岛绫乃一直渴望出道，\n却始终被凛香压制在副位。\n他利用职权掌握凛香家族的债务把柄，\n企图逼迫凛香自愿退团。`,
+  epilogue: `凛香获救后，第一时间赶回校园祭舞台。那一夜，聚光灯如期亮起，她站在舞台中央，向所有等待她的人深深鞠躬。\n\n"我哪里也没去，我一直都在这里——"\n\n桐岛先生被警方带走，而绫乃在获知父亲所作所为后，当众向凛香道歉，泣不成声。两个女孩，最终选择了和解。\n\n校园祭的花火如期绽放，照亮了每一张仰望天空的脸。`
+};
+
+// STATE
+let progress = {}; // {ci_mode: true}
+let unlockedClues = new Set();
+
+function isDone(ci, mode) { return !!progress[ci+'_'+mode]; }
+function isChapterUnlocked(ci) { return ci === 0 || isDone(ci-1, 'easy'); }
+function allDone() { return CHAPTERS.every((_,i)=>isDone(i,'easy')&&isDone(i,'hard')); }
+
+function getClueForMode(ci, mode) {
+  return CLUES.find(c=>c.ci===ci&&c.mode===mode);
+}
+
+// ---- TITLE ----
+document.getElementById('title-start').onclick = () => {
+  document.getElementById('screen-title').style.display='none';
+  showSelect();
+};
+
+// ---- SELECT ----
+function showSelect() {
+  document.getElementById('screen-select').style.display='block';
+  document.getElementById('screen-game').style.display='none';
+  document.getElementById('screen-end').style.display='none';
+  document.getElementById('screen-final').style.display='none';
+  renderSelect();
+}
+
+function renderSelect() {
+  const list = document.getElementById('chapter-list');
+  list.innerHTML = '';
+  CHAPTERS.forEach((ch,ci)=>{
+    const unlocked = isChapterUnlocked(ci);
+    const doneEasy = isDone(ci,'easy'), doneHard = isDone(ci,'hard');
+    const clueCount = [doneEasy,doneHard].filter(Boolean).length;
+    const row = document.createElement('div');
+    row.className = 'chapter-row' + (unlocked?'':' chapter-locked');
+
+    if(!unlocked){
+      // Previous chapter's name for hint
+      const prevTitle = CHAPTERS[ci-1].title;
+      row.innerHTML = `
+        <div class="ch-title-row">
+          <div>
+            <div class="ch-name">${ch.title}</div>
+            <div class="ch-sub">${ch.sub}</div>
+          </div>
+          <div class="ch-clue-badge locked">🔒 未解锁</div>
+        </div>
+        <div class="chapter-lock-overlay">🔒 完成「${prevTitle}」简易模式后解锁</div>`;
+    } else {
+      row.innerHTML = `
+        <div class="ch-title-row">
+          <div>
+            <div class="ch-name">${ch.title}</div>
+            <div class="ch-sub">${ch.sub}</div>
+          </div>
+          <div class="ch-clue-badge ${clueCount===0?'locked':''}">${clueCount===0?'🔒 未解锁线索':`🔍 ${clueCount}/2 条线索`}</div>
+        </div>
+        <div class="diff-row">
+          <button class="diff-btn easy ${doneEasy?'done-easy':''}" data-ci="${ci}" data-d="easy">
+            📖 简易模式${doneEasy?'<span class="done-mark">✓</span>':''}
+          </button>
+          <button class="diff-btn hard ${doneHard?'done-hard':''}" data-ci="${ci}" data-d="hard">
+            ⚔ 挑战模式${doneHard?'<span class="done-mark">✓</span>':''}
+          </button>
+        </div>`;
+    }
+    list.appendChild(row);
+  });
+  list.querySelectorAll('.diff-btn').forEach(btn=>{
+    btn.onclick=()=>startGame(parseInt(btn.dataset.ci), btn.dataset.d);
+  });
+
+  // clue panel
+  const panel = document.getElementById('clue-list-panel');
+  panel.innerHTML='';
+  const unlocked = CLUES.filter(c=>isDone(c.ci, c.mode));
+  if(unlocked.length===0){
+    panel.innerHTML='<div class="clue-locked">完成关卡后，线索将在此处显示……</div>';
+  } else {
+    unlocked.forEach(c=>{
+      const d=document.createElement('div');
+      d.className='clue-item';
+      d.innerHTML=`<div class="clue-num">${c.num}</div><div class="clue-text"><b style="color:var(--gold-light);">${c.title}</b><br>${c.text}</div>`;
+      panel.appendChild(d);
+    });
+  }
+
+  // hint text
+  const total = CLUES.length;
+  const got = CLUES.filter(c=>isDone(c.ci,c.mode)).length;
+  if(allDone()){
+    document.getElementById('mystery-progress-hint').innerHTML = '🎉 所有线索已收集！<span style="color:#d4a843;cursor:pointer;text-decoration:underline;" id="reveal-link">点此揭晓真相 →</span>';
+    setTimeout(()=>{
+      const l=document.getElementById('reveal-link');
+      if(l) l.onclick=showFinal;
+    },100);
+  } else {
+    document.getElementById('mystery-progress-hint').textContent=`🔍 已解锁 ${got}/${total} 条线索 — 完成关卡继续追查`;
+  }
+}
+
+// ---- GAME ----
+let curCI, curDiff, pile, tray, score, combo, matched, total;
+let timerSec, timerInt;
+
+function startGame(ci, diff) {
+  curCI=ci; curDiff=diff;
+  score=0; combo=0; matched=0; tray=[];
+  clearInterval(timerInt); timerSec=0;
+
+  document.getElementById('screen-select').style.display='none';
+  document.getElementById('screen-end').style.display='none';
+  document.getElementById('screen-game').style.display='block';
+  document.getElementById('grid').style.display='grid';
+  document.getElementById('tray').style.display='flex';
+  document.getElementById('progress-fill').style.width='0%';
+  document.getElementById('game-ch-title').textContent=CHAPTERS[ci].title;
+  const badge=document.getElementById('mode-badge');
+  badge.textContent=diff==='easy'?'简易模式':'挑战模式';
+  badge.className='mode-badge '+diff;
+
+  const timerWrap=document.getElementById('timer-wrap');
+  if(diff==='hard'){
+    timerWrap.style.display='block';
+    timerWrap.classList.remove('urgent');
+    document.getElementById('timer-val').textContent='00:00';
+    timerInt=setInterval(()=>{
+      timerSec++;
+      const m=String(Math.floor(timerSec/60)).padStart(2,'0');
+      const s=String(timerSec%60).padStart(2,'0');
+      document.getElementById('timer-val').textContent=m+':'+s;
+      if(timerSec>120) timerWrap.classList.add('urgent');
+    },1000);
+  } else {
+    timerWrap.style.display='none';
+  }
+
+  buildPile(CHAPTERS[ci].words, diff);
+  setInfo(diff==='easy'?'收集3张相同单词即可消除！':'收集同一单词的汉字・假名・中文各1张消除！');
+  renderAll();
+}
+
+function buildPile(words, diff) {
+  pile=[];
+  let uid=0;
+  if(diff==='easy'){
+    words.forEach(w=>{
+      for(let i=0;i<3;i++) pile.push({uid:uid++,w:w.w,k:w.k,cn:w.cn,type:'easy',layers:Math.floor(Math.random()*2),used:false,inTray:false});
+    });
+  } else {
+    words.forEach(w=>{
+      ['jp','kana','cn'].forEach(t=>pile.push({uid:uid++,w:w.w,k:w.k,cn:w.cn,type:t,layers:Math.floor(Math.random()*2),used:false,inTray:false}));
+    });
+  }
+  shuffle(pile);
+}
+
+function cardLabel(c){
+  if(c.type==='easy') return null; // handled separately
+  if(c.type==='jp')   return c.w;
+  if(c.type==='kana') return c.k;
+  return c.cn;
+}
+
+function renderAll(){ renderGrid(); renderTray(); renderStats(); }
+
+function renderGrid(){
+  const g=document.getElementById('grid');
+  g.innerHTML='';
+  pile.forEach((card,i)=>{
+    if(card.used) return;
+    const el=document.createElement('div');
+    let cls='card';
+    if(card.inTray) cls+=' in-tray';
+    if(card.layers>0) cls+=' locked';
+    if(card.type!=='easy') cls+=' type-'+card.type;
+    el.className=cls;
+
+    if(card.layers>0){
+      el.innerHTML=`<div class="lock-icon">🔒</div>`;
+    } else if(card.type==='easy'){
+      el.innerHTML=`<div class="card-kana-big">${card.k}</div><div class="card-jp-small">${card.w}</div><div class="card-cn-small">${card.cn}</div>`;
+    } else {
+      el.innerHTML=`<div class="card-hard-text">${cardLabel(card)}</div>`;
+    }
+    if(!card.inTray&&card.layers===0) el.onclick=()=>clickCard(i);
+    g.appendChild(el);
+  });
+}
+
+function clickCard(idx){
+  const card=pile[idx];
+  if(card.used||card.inTray||card.layers>0) return;
+  if(tray.length>=7){ setInfo('收集槽已满！','bad'); showEnd(false); return; }
+  card.inTray=true;
+  tray.push({...card,pileIdx:idx});
+  pile.forEach((c,i)=>{ if(!c.used&&!c.inTray&&c.layers>0&&Math.random()>0.5) pile[i].layers=Math.max(0,c.layers-1); });
+  checkTray();
+  renderAll();
+}
+
+function checkTray(){
+  if(curDiff==='easy'){
+    let groups={};
+    tray.forEach(c=>{if(!groups[c.w])groups[c.w]=[];groups[c.w].push(c);});
+    Object.keys(groups).forEach(w=>{ if(groups[w].length>=3) doElim(w,groups[w].slice(0,3)); });
+  } else {
+    let groups={};
+    tray.forEach(c=>{if(!groups[c.w])groups[c.w]={};groups[c.w][c.type]=c;});
+    Object.keys(groups).forEach(w=>{
+      const g=groups[w];
+      if(g.jp&&g.kana&&g.cn) doElim(w,[g.jp,g.kana,g.cn]);
+    });
+  }
+}
+
+function doElim(wordKey, cards){
+  combo++; score+=10*combo; matched++;
+  const total_=CHAPTERS[curCI].words.length;
+  cards.forEach(c=>{ pile[c.pileIdx].used=true; pile[c.pileIdx].inTray=false; });
+  tray=tray.filter(c=>c.w!==wordKey);
+  const s=cards[0];
+  setInfo(`消除！${s.w}（${s.k}）= ${s.cn}　×${combo}连击`,'ok');
+  document.getElementById('progress-fill').style.width=(matched/total_*100).toFixed(0)+'%';
+  if(matched>=total_) setTimeout(()=>showEnd(true),400);
+}
+
+function renderTray(){
+  const el=document.getElementById('tray');
+  el.innerHTML=`<div class="tray-label">收集槽 (${tray.length}/7)</div>`;
+  if(curDiff==='easy'){
+    let groups={},seen={};
+    tray.forEach(c=>{if(!groups[c.w])groups[c.w]=[];groups[c.w].push(c);});
+    tray.forEach(c=>{
+      if(seen[c.w]) return; seen[c.w]=true;
+      const d=document.createElement('div');
+      d.className='tray-card easy-card';
+      d.textContent=c.k+(groups[c.w].length>1?' ×'+groups[c.w].length:'');
+      el.appendChild(d);
+    });
+  } else {
+    tray.forEach(c=>{
+      const d=document.createElement('div');
+      d.className='tray-card '+c.type;
+      d.textContent=c.type==='jp'?c.w:c.type==='kana'?c.k:c.cn;
+      el.appendChild(d);
+    });
+  }
+}
+
+function renderStats(){
+  document.getElementById('score').textContent=score;
+  document.getElementById('combo').textContent=combo;
+  document.getElementById('remain').textContent=CHAPTERS[curCI].words.length-matched;
+}
+
+function setInfo(msg,cls=''){ const el=document.getElementById('info-bar'); el.textContent=msg; el.className='info-bar '+cls; }
+
+function showEnd(win){
+  clearInterval(timerInt);
+  document.getElementById('grid').style.display='none';
+  document.getElementById('tray').style.display='none';
+  document.getElementById('screen-end').style.display='block';
+
+  if(win){
+    const timeStr = curDiff==='hard'?` 用时 ${Math.floor(timerSec/60).toString().padStart(2,'0')}:${(timerSec%60).toString().padStart(2,'0')}`:' ';
+    document.getElementById('end-icon').textContent='🌸';
+    document.getElementById('end-title').textContent='消除成功！';
+    document.getElementById('end-sub').textContent=`得分 ${score} 分${timeStr}\n线索已解锁，继续调查！`;
+    document.getElementById('next-btn').style.display='inline-block';
+
+    if(!isDone(curCI, curDiff)){
+      progress[curCI+'_'+curDiff]=true;
+      const clue=getClueForMode(curCI,curDiff);
+      if(clue) setTimeout(()=>showClueModal(clue),300);
+    }
+  } else {
+    document.getElementById('end-icon').textContent='💔';
+    document.getElementById('end-title').textContent='调查中断';
+    document.getElementById('end-sub').textContent='收集槽已满，无法继续。重振旗鼓再试一次！';
+    document.getElementById('next-btn').style.display='none';
+  }
+}
+
+function showClueModal(clue){
+  document.getElementById('modal-num').textContent=clue.num;
+  document.getElementById('modal-title').textContent=clue.title;
+  document.getElementById('modal-text').textContent=clue.text;
+  document.getElementById('clue-modal').classList.add('show');
+}
+document.getElementById('modal-continue').onclick=()=>{
+  document.getElementById('clue-modal').classList.remove('show');
+};
+
+document.getElementById('back-btn').onclick=()=>{ clearInterval(timerInt); showSelect(); };
+document.getElementById('back-end-btn').onclick=showSelect;
+document.getElementById('retry-btn').onclick=()=>{ document.getElementById('screen-end').style.display='none'; startGame(curCI,curDiff); };
+document.getElementById('next-btn').onclick=()=>{ showSelect(); if(allDone()){ setTimeout(()=>{ document.getElementById('mystery-progress-hint').click?.(); },200); } };
+document.getElementById('hint-btn').onclick=()=>{
+  if(curDiff==='easy'){
+    let av=pile.filter(c=>!c.used&&!c.inTray&&c.layers===0);
+    let gr={}; av.forEach(c=>{if(!gr[c.w])gr[c.w]=[];gr[c.w].push(c);});
+    let best=Object.entries(gr).sort((a,b)=>b[1].length-a[1].length)[0];
+    if(best) setInfo(`提示："${best[1][0].k}"（${best[1][0].w}），场上还有 ${best[1].length} 张`,'hint');
+  } else {
+    let av=pile.filter(c=>!c.used&&!c.inTray&&c.layers===0);
+    let gr={}; av.forEach(c=>{if(!gr[c.w])gr[c.w]=new Set();gr[c.w].add(c.type);});
+    let tg={}; tray.forEach(c=>{if(!tg[c.w])tg[c.w]=new Set();tg[c.w].add(c.type);});
+    let best=null,bs=-1;
+    Object.keys(gr).forEach(w=>{ let s=(tg[w]||new Set()).size+gr[w].size; if(s>bs){bs=s;best={w,types:[...gr[w]],have:(tg[w]||new Set()).size};} });
+    if(best){ const tn={jp:'汉字',kana:'假名',cn:'中文'}; setInfo(`提示："${best.w}" 场上还有 ${best.types.map(t=>tn[t]).join('/')}，槽内已有${best.have}种`,'hint'); }
+  }
+};
+
+function showFinal(){
+  document.getElementById('screen-select').style.display='none';
+  document.getElementById('screen-final').style.display='block';
+  const sum=document.getElementById('final-clues-summary');
+  sum.innerHTML='';
+  CLUES.forEach(c=>{
+    const p=document.createElement('p');
+    p.style.cssText='color:rgba(255,255,255,0.6);font-size:12px;margin-bottom:8px;padding-left:12px;border-left:2px solid rgba(212,168,67,0.4);';
+    p.innerHTML=`<span style="color:var(--gold);font-size:11px;">${c.num}</span>　${c.title}`;
+    sum.appendChild(p);
+  });
+  document.getElementById('final-answer').textContent=FINAL.answer;
+  document.getElementById('final-epilogue').textContent=FINAL.epilogue;
+}
+document.getElementById('final-back-btn').onclick=showSelect;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+</script>
