@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/obfuscate.js && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "obf": "node scripts/obfuscate.js"
   },
   "dependencies": {
     "next": "16.2.4",
@@ -20,6 +21,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "javascript-obfuscator": "^5.4.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
