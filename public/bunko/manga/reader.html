@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>漫画阅读器</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0e;
+    --surface: #1a1a1a;
+    --border: #2a2a2a;
+    --accent: #e8d5a3;
+    --text: #c8c0b0;
+    --muted: #5a5550;
+    --page-bg: #141414;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    user-select: none;
+  }
+
+  /* Header */
+  .header {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    opacity: 0.9;
+  }
+
+  .page-info {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* Image Stage */
+  .stage {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 0;
+    min-height: 70vh;
+  }
+
+  .img-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .manga-img {
+    max-width: min(680px, 90vw);
+    max-height: 78vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    border: 1px solid var(--border);
+    background: var(--page-bg);
+    box-shadow:
+      0 0 0 1px rgba(232,213,163,0.04),
+      0 24px 80px rgba(0,0,0,0.7),
+      0 8px 24px rgba(0,0,0,0.5);
+    transition: opacity 0.22s ease;
+  }
+
+  .manga-img.fading { opacity: 0; }
+
+  /* Hit zones */
+  .hit-prev, .hit-next {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 42%;
+    cursor: pointer;
+    z-index: 10;
+  }
+  .hit-prev { left: 0; }
+  .hit-next { right: 0; }
+
+  /* Arrow overlays */
+  .arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(14,14,14,0.75);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--muted);
+    font-size: 16px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.18s ease, color 0.18s ease;
+    backdrop-filter: blur(6px);
+  }
+  .arrow-prev { left: 16px; }
+  .arrow-next { right: 16px; }
+
+  .stage:hover .arrow { opacity: 1; }
+  .hit-prev:hover ~ .arrow-prev,
+  .hit-next:hover ~ .arrow-next { color: var(--accent); }
+
+  /* Disabled state */
+  .hit-prev.disabled, .hit-next.disabled { cursor: default; }
+  .hit-prev.disabled ~ .arrow-prev,
+  .hit-next.disabled ~ .arrow-next { opacity: 0 !important; }
+
+  /* Bottom bar */
+  .bottom {
+    width: 100%;
+    max-width: 900px;
+    padding: 16px 24px 28px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  /* Progress bar */
+  .progress-track {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+    opacity: 0.7;
+  }
+
+  /* Thumb strip */
+  .thumb-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  /* Loading */
+  .loading-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    pointer-events: none;
+  }
+
+  .spinner {
+    width: 28px; height: 28px;
+    border: 1px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    opacity: 0.6;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* Hint toast */
+  .hint {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 8px 16px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .hint.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Error */
+  .error-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 300px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+    line-height: 1.8;
+  }
+  .error-state.visible { display: flex; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="title" id="readerTitle">漫画</span>
+  <span class="page-info" id="pageInfo">— / —</span>
+</div>
+
+<div class="stage" id="stage">
+  <div class="img-wrap" id="imgWrap">
+    <img class="manga-img" id="mangaImg" src="" alt="manga page" draggable="false">
+    <div class="loading-state" id="loadingState">
+      <div class="spinner"></div>
+      <span class="loading-text">loading</span>
+    </div>
+    <div class="error-state" id="errorState">
+      <span>图片加载失败</span>
+      <span style="font-size:10px;">请确认文件已放入 public/manga/ 文件夹</span>
+    </div>
+  </div>
+  <div class="hit-prev" id="hitPrev"></div>
+  <div class="hit-next" id="hitNext"></div>
+  <div class="arrow arrow-prev">‹</div>
+  <div class="arrow arrow-next">›</div>
+</div>
+
+<div class="bottom">
+  <span class="thumb-label" id="thumbLabel">001</span>
+  <div class="progress-track" id="progressTrack">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <span class="thumb-label" id="totalLabel">—</span>
+</div>
+
+<div class="hint" id="hint">← → 键翻页　点击左右区域翻页　支持滑动</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+// 修改这里：漫画标题
+const TITLE = "漫画";
+
+// 修改这里：图片文件夹路径（相对于网站根目录）
+const IMG_FOLDER = "/bunko/manga/";
+
+// 修改这里：图片总数
+const TOTAL = 16;
+
+// 修改这里：图片格式（jpg / png / webp）
+const EXT = "jpg";
+
+// 修改这里：文件名是几位数字（3 = 001.jpg，4 = 0001.jpg）
+const DIGITS = 3;
+// ──────────────────────────────────────────────────────────
+
+let current = 1;
+let isTransitioning = false;
+
+const img       = document.getElementById('mangaImg');
+const pageInfo  = document.getElementById('pageInfo');
+const thumbLabel= document.getElementById('thumbLabel');
+const totalLabel= document.getElementById('totalLabel');
+const progressFill = document.getElementById('progressFill');
+const hitPrev   = document.getElementById('hitPrev');
+const hitNext   = document.getElementById('hitNext');
+const loadingState = document.getElementById('loadingState');
+const errorState   = document.getElementById('errorState');
+const hint      = document.getElementById('hint');
+
+document.getElementById('readerTitle').textContent = TITLE;
+totalLabel.textContent = String(TOTAL).padStart(DIGITS, '0');
+
+function pad(n) {
+  return String(n).padStart(DIGITS, '0');
+}
+
+function imgPath(n) {
+  return `${IMG_FOLDER}${pad(n)}.${EXT}`;
+}
+
+function updateUI() {
+  pageInfo.textContent = `${pad(current)} / ${pad(TOTAL)}`;
+  thumbLabel.textContent = pad(current);
+  progressFill.style.width = `${((current - 1) / (TOTAL - 1)) * 100}%`;
+  hitPrev.classList.toggle('disabled', current === 1);
+  hitNext.classList.toggle('disabled', current === TOTAL);
+}
+
+function goTo(n, direction) {
+  if (isTransitioning || n < 1 || n > TOTAL) return;
+  isTransitioning = true;
+  errorState.classList.remove('visible');
+
+  img.classList.add('fading');
+  loadingState.style.display = 'flex';
+
+  setTimeout(() => {
+    current = n;
+    updateUI();
+
+    const newImg = new Image();
+    newImg.onload = () => {
+      img.src = newImg.src;
+      img.classList.remove('fading');
+      loadingState.style.display = 'none';
+      isTransitioning = false;
+    };
+    newImg.onerror = () => {
+      img.classList.remove('fading');
+      loadingState.style.display = 'none';
+      errorState.classList.add('visible');
+      isTransitioning = false;
+    };
+    newImg.src = imgPath(n);
+  }, 180);
+}
+
+// Arrow clicks
+hitPrev.addEventListener('click', () => goTo(current - 1));
+hitNext.addEventListener('click', () => goTo(current + 1));
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
+});
+
+// Touch swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 50) dx < 0 ? goTo(current + 1) : goTo(current - 1);
+}, { passive: true });
+
+// Progress bar click
+document.getElementById('progressTrack').addEventListener('click', e => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  goTo(Math.max(1, Math.min(TOTAL, Math.round(ratio * (TOTAL - 1)) + 1)));
+});
+
+// Show hint briefly
+setTimeout(() => { hint.classList.add('show'); }, 800);
+setTimeout(() => { hint.classList.remove('show'); }, 3800);
+
+// Init
+loadingState.style.display = 'flex';
+img.onload = () => { loadingState.style.display = 'none'; updateUI(); };
+img.onerror = () => { loadingState.style.display = 'none'; errorState.classList.add('visible'); updateUI(); };
+img.src = imgPath(1);
+updateUI();
+</script>
+</body>
+</html>
