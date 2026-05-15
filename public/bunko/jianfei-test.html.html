@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>減肥テスト — 語彙・文法・表達</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&family=Noto+Serif+JP:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0faf4;--surface:#ffffff;--surface-light:#f0fdf4;
+  --accent:#16a34a;--accent-soft:#4ade80;--gold:#c47f17;
+  --correct:#16a34a;--wrong:#dc2626;
+  --text:#1e1040;--text-muted:#7c6f8a;--sakura:#15803d;
+  --sec1:#16a34a;--sec2:#c47f17;--sec3:#0369a1;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:linear-gradient(135deg,#f0fdf4 0%,#fefce8 45%,#f0f7ff 100%);color:var(--text);font-family:'Noto Sans SC','Noto Serif JP',sans-serif;overflow-x:hidden}
+
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes floatLeaf{0%,100%{transform:translateY(0) rotate(0deg);opacity:.18}50%{transform:translateY(-18px) rotate(180deg);opacity:.38}}
+@keyframes popIn{0%{transform:scale(.82);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+@keyframes correctFlash{0%{box-shadow:0 0 0 0 rgba(22,163,74,.45)}70%{box-shadow:0 0 0 14px rgba(22,163,74,0)}100%{box-shadow:0 0 0 0 rgba(22,163,74,0)}}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+@keyframes breathe{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,.35)}50%{box-shadow:0 0 0 10px rgba(22,163,74,0)}}
+
+.bg-decor{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg-orb{position:absolute;border-radius:50%}
+.bg-orb-1{top:-10%;right:-5%;width:320px;height:320px;background:radial-gradient(circle,rgba(22,163,74,.12) 0%,transparent 70%)}
+.bg-orb-2{bottom:8%;left:-5%;width:260px;height:260px;background:radial-gradient(circle,rgba(196,127,23,.14) 0%,transparent 70%)}
+.leaf{position:absolute;width:10px;height:10px;background:radial-gradient(ellipse at 30% 30%,var(--sakura),transparent);border-radius:50% 0 50% 50%;opacity:.25;pointer-events:none}
+.leaf-0{top:12%;left:8%;animation:floatLeaf 8s ease-in-out infinite 0s}
+.leaf-1{top:28%;left:22%;animation:floatLeaf 11s ease-in-out infinite 1.8s}
+.leaf-2{top:52%;left:75%;animation:floatLeaf 13s ease-in-out infinite 3.2s}
+.leaf-3{top:70%;left:40%;animation:floatLeaf 10s ease-in-out infinite 5s}
+
+#app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 0 60px}
+
+/* ── HOME ── */
+.home{display:flex;flex-direction:column;align-items:center;gap:26px;padding:52px 20px 20px;width:100%;max-width:640px}
+.home-title{font-family:'Noto Serif JP',serif;font-size:clamp(52px,11vw,78px);font-weight:900;background:linear-gradient(135deg,var(--sakura),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:8px;animation:fadeSlideUp .55s ease;text-align:center;line-height:1.1}
+.home-sub{color:var(--text-muted);font-size:12px;letter-spacing:3px;animation:fadeSlideUp .55s ease .1s both;margin-top:-10px}
+.home-desc{background:rgba(255,255,255,.72);border-radius:16px;padding:18px 22px;border:1px solid rgba(0,0,0,.07);font-size:14px;line-height:1.9;color:var(--text);animation:fadeSlideUp .55s ease .2s both;backdrop-filter:blur(6px);width:100%}
+.home-desc strong{color:var(--sakura);font-weight:700}
+.sec-preview{display:flex;flex-direction:column;gap:10px;width:100%;animation:fadeSlideUp .55s ease .3s both}
+.sec-row{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.65);border-radius:14px;padding:14px 18px;border:1px solid rgba(0,0,0,.07)}
+.sec-badge{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.5px;flex-shrink:0}
+.sec-badge.s1{background:rgba(22,163,74,.12);color:var(--sec1)}
+.sec-badge.s2{background:rgba(196,127,23,.12);color:var(--sec2)}
+.sec-badge.s3{background:rgba(3,105,161,.12);color:var(--sec3)}
+.sec-info{font-size:13px;line-height:1.5}
+.sec-info b{font-size:12px;color:var(--text-muted);font-weight:400}
+.start-btn{padding:16px 52px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-soft));color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:'Noto Sans SC',sans-serif;box-shadow:0 6px 28px rgba(22,163,74,.35);transition:all .25s;animation:fadeSlideUp .55s ease .4s both,pulse 2.5s ease 1s infinite}
+.start-btn:hover{transform:scale(1.04)}
+
+/* ── QUIZ ── */
+.quiz-wrap{width:100%;max-width:640px;padding:0 16px;display:flex;flex-direction:column;gap:0}
+.quiz-header{padding:16px 4px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:linear-gradient(to bottom,rgba(240,250,244,1) 80%,transparent);z-index:10}
+.quiz-back{background:rgba(0,0,0,.05);border:none;color:var(--text-muted);font-size:12px;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:'Noto Sans SC',sans-serif}
+.quiz-back:hover{background:rgba(0,0,0,.09)}
+.quiz-prog-label{font-size:13px;font-weight:700;color:var(--sakura)}
+.quiz-score-label{font-size:13px;font-weight:700;color:var(--gold)}
+.progress-bar{width:100%;height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden;margin-bottom:20px}
+.progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--gold));transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+.q-card{background:rgba(255,255,255,.82);border-radius:20px;padding:22px 20px;border:1px solid rgba(0,0,0,.07);box-shadow:0 4px 24px rgba(0,0,0,.07);backdrop-filter:blur(8px);animation:fadeSlideUp .4s ease both;margin-bottom:12px}
+.q-sec-tag{display:inline-block;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px;letter-spacing:.5px}
+.q-sec-tag.s1{background:rgba(22,163,74,.1);color:var(--sec1)}
+.q-sec-tag.s2{background:rgba(196,127,23,.1);color:var(--sec2)}
+.q-sec-tag.s3{background:rgba(3,105,161,.1);color:var(--sec3)}
+.q-num{font-size:11px;color:var(--text-muted);margin-bottom:6px}
+.q-stem{font-family:'Noto Serif JP',serif;font-size:15px;line-height:1.85;font-weight:600;margin-bottom:4px;color:var(--text);white-space:pre-line}
+.q-hint{font-size:11px;color:var(--text-muted);margin-bottom:16px;line-height:1.6}
+.q-options{display:flex;flex-direction:column;gap:8px}
+.q-opt{padding:12px 16px;border-radius:12px;border:1.5px solid rgba(0,0,0,.1);background:rgba(255,255,255,.8);cursor:pointer;font-size:13.5px;line-height:1.55;font-family:'Noto Serif JP',serif;transition:all .2s;text-align:left;color:var(--text);position:relative;overflow:hidden}
+.q-opt:hover:not(.locked){border-color:var(--accent);background:rgba(22,163,74,.05);transform:translateX(3px)}
+.q-opt.selected{border-color:var(--accent);background:rgba(22,163,74,.08)}
+.q-opt.correct{border-color:var(--correct);background:rgba(22,163,74,.1);color:var(--correct);animation:correctFlash .6s ease;font-weight:600}
+.q-opt.wrong{border-color:var(--wrong);background:rgba(220,38,38,.07);color:var(--wrong);animation:wrongShake .45s ease}
+.q-opt.reveal{border-color:var(--correct);background:rgba(22,163,74,.07);color:var(--correct)}
+.q-opt.locked{cursor:default}
+.opt-letter{display:inline-block;width:22px;height:22px;border-radius:6px;background:rgba(0,0,0,.07);font-size:11px;font-weight:700;text-align:center;line-height:22px;margin-right:10px;flex-shrink:0;font-family:'Noto Sans SC',sans-serif;vertical-align:middle}
+.q-opt.correct .opt-letter{background:rgba(22,163,74,.2);color:var(--correct)}
+.q-opt.wrong .opt-letter{background:rgba(220,38,38,.15);color:var(--wrong)}
+.q-opt.reveal .opt-letter{background:rgba(22,163,74,.15);color:var(--correct)}
+
+.explain-box{margin-top:14px;background:rgba(196,127,23,.07);border:1px solid rgba(196,127,23,.2);border-radius:12px;padding:12px 16px;font-size:12px;line-height:1.8;color:var(--gold);animation:fadeSlideUp .35s ease}
+.explain-box strong{font-weight:700;color:var(--text)}
+
+.next-btn{width:100%;padding:13px;border-radius:13px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-soft));color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans SC',sans-serif;box-shadow:0 4px 18px rgba(22,163,74,.3);transition:all .2s;margin-top:4px;animation:fadeSlideUp .35s ease}
+.next-btn:hover{transform:scale(1.02)}
+
+/* ── RESULT ── */
+.result{display:flex;flex-direction:column;align-items:center;gap:20px;padding:52px 20px 40px;width:100%;max-width:640px;animation:fadeSlideUp .5s ease}
+.result-emoji{font-size:72px;animation:popIn .5s ease .1s both}
+.result-title{font-family:'Noto Serif JP',serif;font-size:38px;font-weight:900;background:linear-gradient(135deg,var(--sakura),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:fadeSlideUp .5s ease .2s both}
+.result-sub{color:var(--text-muted);font-size:14px;animation:fadeSlideUp .5s ease .25s both;text-align:center;line-height:1.7}
+.result-box{background:rgba(255,255,255,.8);border-radius:22px;padding:28px 52px;text-align:center;border:1px solid rgba(0,0,0,.08);box-shadow:0 4px 24px rgba(0,0,0,.07);animation:popIn .5s ease .35s both;backdrop-filter:blur(8px)}
+.result-pct{font-size:56px;font-weight:800;color:var(--gold)}
+.result-detail{font-size:14px;color:var(--text-muted);margin-top:6px}
+.result-sec-breakdown{width:100%;display:flex;flex-direction:column;gap:8px;animation:fadeSlideUp .5s ease .4s both}
+.sec-bar-row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.72);border-radius:12px;padding:12px 16px;border:1px solid rgba(0,0,0,.06)}
+.sec-bar-label{font-size:12px;font-weight:600;width:80px;flex-shrink:0}
+.sec-bar-track{flex:1;height:8px;background:rgba(0,0,0,.07);border-radius:4px;overflow:hidden}
+.sec-bar-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.sec-bar-fill.s1{background:linear-gradient(90deg,var(--sec1),var(--accent-soft))}
+.sec-bar-fill.s2{background:linear-gradient(90deg,var(--sec2),#e8c44d)}
+.sec-bar-fill.s3{background:linear-gradient(90deg,var(--sec3),#38b2f7)}
+.sec-bar-score{font-size:12px;font-weight:700;width:36px;text-align:right;flex-shrink:0}
+.result-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;animation:fadeSlideUp .5s ease .5s both}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-soft));border:none;color:#fff;padding:13px 38px;border-radius:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans SC',sans-serif;box-shadow:0 4px 20px rgba(22,163,74,.3);transition:all .2s}
+.btn-primary:hover{transform:scale(1.04)}
+.btn-secondary{background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.12);color:var(--text);padding:12px 28px;border-radius:13px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans SC',sans-serif;transition:all .2s}
+.btn-secondary:hover{background:rgba(0,0,0,.07)}
+
+/* ── REVIEW ── */
+.review-wrap{width:100%;max-width:640px;padding:0 16px 40px;display:flex;flex-direction:column;gap:10px}
+.review-header{padding:16px 4px 10px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:linear-gradient(to bottom,rgba(240,250,244,1) 80%,transparent);z-index:10}
+.review-title{font-size:15px;font-weight:700;color:var(--sakura)}
+.r-card{background:rgba(255,255,255,.8);border-radius:16px;padding:16px 18px;border:1.5px solid rgba(0,0,0,.07);animation:fadeSlideUp .3s ease both}
+.r-card.r-ok{border-color:rgba(22,163,74,.3)}
+.r-card.r-ng{border-color:rgba(220,38,38,.25)}
+.r-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.r-icon{font-size:18px}
+.r-q-text{font-family:'Noto Serif JP',serif;font-size:13px;line-height:1.7;color:var(--text)}
+.r-answer-row{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;margin-top:6px}
+.r-your{padding:2px 10px;border-radius:6px;background:rgba(220,38,38,.08);color:var(--wrong)}
+.r-correct{padding:2px 10px;border-radius:6px;background:rgba(22,163,74,.1);color:var(--correct);font-weight:600}
+.r-explain{font-size:11px;color:var(--gold);margin-top:6px;line-height:1.7;padding-top:6px;border-top:1px dashed rgba(196,127,23,.25)}
+
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="bg-decor">
+  <div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div>
+  <div class="leaf leaf-0"></div><div class="leaf leaf-1"></div>
+  <div class="leaf leaf-2"></div><div class="leaf leaf-3"></div>
+</div>
+<div id="app"></div>
+
+<script>
+// ══════════════════════════════════════════
+//  減肥テスト — 30問  語彙・文法・表達
+// ══════════════════════════════════════════
+
+const QUESTIONS = [
+
+// ════════════════════════════════
+//  第一節：語彙理解（10問）
+// ════════════════════════════════
+{
+  sec:1, secName:"語彙理解",
+  stem:"「腹八分目（はらはちぶんめ）」とはどういう意味ですか？",
+  hint:"ハルキが「簡単に言うと…」と説明した部分が出典です。",
+  opts:["お腹が80%空になった状態のこと","お腹が100%いっぱいになる前に80%くらいで食べるのをやめるという考え方","食事を8回に分けて食べること","お腹の80%だけを使って消化すること"],
+  ans:1,
+  explain:"ハルキが「お腹が100%いっぱいになる前に、80%くらいのところで食べるのをやめる」という考え方だと説明しています。止まるタイミングの感覚が大切です。"
+},
+{
+  sec:1, secName:"語彙理解",
+  stem:"「早食い（はやぐい）」とはどういう意味ですか？",
+  hint:"ユイが「ついつい急いで食べちゃう」と言った文脈が出典です。",
+  opts:["早朝に食事をとること","急いで速くご飯を食べること","食欲が旺盛なこと","決まった時間に食事をとること"],
+  ans:1,
+  explain:"「早食い」は「急いで素早くご飯を食べること」。対話では「ゆっくりよく噛んで食べる」ことの反対として出てきます。早食いは脳が満腹を感じる前に食べすぎてしまう原因になります。"
+},
+{
+  sec:1, secName:"語彙理解",
+  stem:"ユイが「『もったいない』って思っちゃう」と言いました。「もったいない」とはどういう意味ですか？",
+  hint:"美味しい料理がたくさん並んでいるのに食べ残す場面の発言です。",
+  opts:["とても残念だ","食べすぎてしまった","食べ物や機会などを無駄にするのが惜しい","お腹がいっぱいで食べられない"],
+  ans:2,
+  explain:"「もったいない」は「使わない・残してしまうのが惜しい」という意味。料理を残すのが「もったいない＝惜しい・無駄になる」と感じるユイの気持ちが表れています。"
+},
+{
+  sec:1, secName:"語彙理解",
+  stem:"ハルキは腹八分目を「厳しいルール」とは言いませんでした。何と表現しましたか？",
+  hint:"「これは厳しいルールというより、___みたいなものですね」という文脈です。",
+  opts:["科学的な健康法","体をいたわるための知恵","医師が設定した基準","食事制限のコツ"],
+  ans:1,
+  explain:"「これは厳しいルールというより、体をいたわるための知恵みたいなものですね」という表現が出てきます。「知恵」は押しつけではなく、自分の体への思いやりから生まれるものというニュアンスです。"
+},
+{
+  sec:1, secName:"語彙理解",
+  stem:"「ポーションサイズ」とは何のことですか？",
+  hint:"ハルキが日本と他の国を比較した際に使った言葉です。",
+  opts:["食事のバランスのこと","料理の値段のこと","一食分の食事の量のこと","食器の大きさのこと"],
+  ans:2,
+  explain:"「一食分の量、いわゆるポーションサイズが、他の国に比べて小さいことが多い」とハルキが説明しています。英語由来の「portion size＝一人分の量」という意味です。"
+},
+{
+  sec:1, secName:"語彙理解",
+  stem:"「一汁三菜（いちじゅうさんさい）」で「汁（じゅう）」とは何を指しますか？",
+  hint:"ハルキの説明を思い出してください。",
+  opts:["主菜のおかず一品","味噌汁などの汁物一つ","ご飯一杯","副菜のおかず三品"],
+  ans:1,
+  explain:"「『汁』は味噌汁などの汁物一つ。『菜』はおかずのことで、主菜が一つと、副菜が二つ」とハルキが説明しました。一汁三菜の基本構成はご飯＋汁物1＋おかず3です。"
+},
+{
+  sec:1, secName:"語彙理解",
+  stem:"「車社会（くるましゃかい）」とはどういう社会ですか？",
+  hint:"ユイが「家のドアから車のドアまで、ほとんど歩かない」と言った文脈です。",
+  opts:["自動車が禁止されている社会","車の生産が盛んな社会","車が主な移動手段で徒歩の機会が少ない社会","電車やバスが発達した社会"],
+  ans:2,
+  explain:"「車社会の国だと、家のドアから車のドアまで、ほとんど歩かない」という文脈から、「車を中心とした生活スタイルで歩く機会が少ない社会」であることが分かります。"
+},
+{
+  sec:1, secName:"語彙理解",
+  stem:"「知らず知らずのうちに」とはどういう意味ですか？",
+  hint:"ユイが一汁三菜について気づきを話した場面で使われています。",
+  opts:["誰にも知らせずに","知識がないまま","気がつかないうちに・無意識のうちに","知ることができないまま"],
+  ans:2,
+  explain:"「知らず知らずのうちに、私たちは毎日バランスのいいオーケストラを聴いてる（食べてる）わけですね」という文脈で使われ、「意識せず自然と」という意味です。"
+},
+{
+  sec:1, secName:"語彙理解",
+  stem:"「積み重ね（つみかさね）」の意味として正しいのはどれですか？",
+  hint:"「毎日の生活の中での小さな運動の___が、実はとても大きい」という文脈です。",
+  opts:["一度に大量に行うこと","小さなことを継続して重ねていくこと","失敗を繰り返すこと","重い荷物を運ぶこと"],
+  ans:1,
+  explain:"「毎日の生活の中での小さな運動の積み重ねが、実はとても大きい」というハルキの言葉が出典です。コツコツ続けることで大きな結果を生む、という意味です。"
+},
+{
+  sec:1, secName:"語彙理解",
+  stem:"対話で「副菜（ふくさい）」の例として挙げられているものはどれですか？",
+  hint:"ユイがコンビニ定食について話した場面が出典です。",
+  opts:["焼き魚や唐揚げなどのメインのおかず","お漬物やひじきの煮物などの小さなおかず","味噌汁などの汁物","デザートや甘いもの"],
+  ans:1,
+  explain:"「お漬物とか、ひじきの煮物とか、小さいお皿がたくさん」とユイが例を挙げました。副菜はメインの主菜に添える小鉢・小皿料理のことです。"
+},
+
+// ════════════════════════════════
+//  第二節：句型選択（10問）
+// ════════════════════════════════
+{
+  sec:2, secName:"句型選択",
+  stem:"「美味しいものを目の前にすると、___お腹いっぱいまで食べたくなっちゃいます」\n__________に入る最も適切な副詞はどれですか？",
+  hint:"意志に反して、気づいたらやってしまうという意味の副詞です。",
+  opts:["ついつい","どうしても","せっかく","もちろん"],
+  ans:0,
+  explain:"「ついつい」は「気がついたら〜してしまう・無意識にやってしまう」という意味の副詞。意図せずそうなってしまう様子を表します。「どうしても」は意志の強さ、「せっかく」は機会を惜しむ表現で、ここには合いません。"
+},
+{
+  sec:2, secName:"句型選択",
+  stem:"「腹八分目は『我慢する』___、『自分の体に耳を傾ける』という感覚に近いかもしれませんね」\n__________に入るのはどれですか？",
+  hint:"AよりBの方が正確に言い表しているという表現です。",
+  opts:["というより","ではなく","よりも","だけでなく"],
+  ans:0,
+  explain:"「AというよりBに近い」は「AよりもBの方が正確・適切な表現だ」というニュアンス。単純な否定（ではなく）ではなく、Aを認めながらBの方が近いという比較で言い直す表現です。"
+},
+{
+  sec:2, secName:"句型選択",
+  stem:"「ゆっくりよく噛んで食べるようにすると、___腹八分目で満足できるようになるんです」\n__________に入る副詞はどれですか？",
+  hint:"努力や意識なしに、ひとりでにそうなるというニュアンスです。",
+  opts:["わざと","自然と","きっと","もちろん"],
+  ans:1,
+  explain:"「自然と〜ようになる」は「意識しなくても、ひとりでに〜できるようになる」という意味。努力しなくても習慣が身につく、という文脈に合います。「きっと」は推測、「もちろん」は当然の意味。"
+},
+{
+  sec:2, secName:"句型選択",
+  stem:"「一食分の量が、他の国___小さいことが多いんです」\n__________に入る最も自然な表現はどれですか？",
+  hint:"比較の基準を示す表現です。",
+  opts:["と比べると","に比べて","よりも","に対して"],
+  ans:1,
+  explain:"「他の国に比べて」は最も自然な比較表現。「に比べて」は基準を示し、「その基準から見ると〜だ」という意味になります。「と比べると」も正しいですが、「に比べて」の方が一般的です。"
+},
+{
+  sec:2, secName:"句型選択",
+  stem:"「時間をかけて食べることで、脳が満腹感を感じる___ができるから」\n__________に入るのはどれですか？",
+  hint:"「時間が生まれる・確保される」という意味の表現を作ります。",
+  opts:["こと","もの","時間","ため"],
+  ans:2,
+  explain:"「脳が満腹感を感じる時間ができる」は「脳が満腹を感じるための時間が生まれる」という意味。「〜する時間ができる」は「〜できる時間が確保される」という自然な表現です。"
+},
+{
+  sec:2, secName:"句型選択",
+  stem:"「特別な運動を___、毎日かなりの距離を歩いていることになるんです」\n__________に入るのはどれですか？",
+  hint:"「〜しなくても実現する・達成される」という逆説的な表現です。",
+  opts:["しないから","しなくても","しないのに","しなければ"],
+  ans:1,
+  explain:"「〜なくても〜できる」は「そうしなくてもその結果が生まれる」という表現。「しないのに」は意外・驚きのニュアンスが強すぎ、「しなければ」は条件文になってしまいます。"
+},
+{
+  sec:2, secName:"句型選択",
+  stem:"「大きなステーキだけのお皿が、力強いソロ演奏だ___、一汁三菜の和食は、小さなオーケストラみたいなものなんです」\n__________に入るのはどれですか？",
+  hint:"仮定的な比喩表現を作る接続表現です。",
+  opts:["だとしたら","とすると","とするなら","だとすると"],
+  ans:3,
+  explain:"「AだとするとB」は「AをAと仮定すれば、それに対してBはこうだ」という比喩説明の典型的な構造。「だとすると」が最も自然で慣用的です。"
+},
+{
+  sec:2, secName:"句型選択",
+  stem:"「一つのすごい秘密があるんじゃなくて、色々な小さな習慣が___、結果になっているんですね」\n__________に入るのはどれですか？",
+  hint:"「〜して、その結果〜になる」という因果の流れを作る表現です。",
+  opts:["組み合わさって","組み合わさるので","組み合わさったから","組み合わさっても"],
+  ans:0,
+  explain:"「〜て（接続して）、結果」という文型。「習慣が組み合わさって→結果になる」は「組み合わさること『によって』結果が生まれる」という手段・原因の表現。「〜ので」「〜から」は理由節になり少しニュアンスが変わります。"
+},
+{
+  sec:2, secName:"句型選択",
+  stem:"「食生活だけが全て___。日常生活の習慣も大きく関係していると思いますよ」\n__________に入る最も自然な否定表現はどれですか？",
+  hint:"ハルキの丁寧な話し方のスタイルに合う表現を選んでください。",
+  opts:["ではありません","ではないです","じゃない","ではなかった"],
+  ans:0,
+  explain:"「〜ではありません」は丁寧な否定の基本形。ハルキは丁寧な話し方をしているため「じゃない」（くだけすぎ）や「ではなかった」（過去形で不適切）は合いません。"
+},
+{
+  sec:2, secName:"句型選択",
+  stem:"「日本に来た外国の方も、日本の食事スタイルと生活スタイルに合わせる___に、自然と健康的なバランスになっていくのかもしれません」\n__________に入るのはどれですか？",
+  hint:"「〜している間に・〜する過程で」という時の流れを表す表現です。",
+  opts:["ために","うちに","ように","ことに"],
+  ans:1,
+  explain:"「〜うちに」は「〜している間に、気づかないうちに変化が起きる」という表現。「合わせるうちに→自然と変化する」という流れに最も合います。「ために」は目的、「ように」は目標・様態を表し、ここには合いません。"
+},
+
+// ════════════════════════════════
+//  第三節：語境判断（10問）
+// ════════════════════════════════
+{
+  sec:3, secName:"語境判断",
+  stem:"ユイが腹八分目を実践するのが難しいと感じる場面として、対話で挙げられているのはどれですか？",
+  hint:"ユイが「忘れてしまいそうです」と言った場面を思い出してください。",
+  opts:["朝食を食べる時","友達と外食に行って美味しい料理がたくさん並んでいる時","一人で家でご飯を食べる時","コンビニ弁当を食べる時"],
+  ans:1,
+  explain:"「友達と外食に行った時とか、美味しい料理がたくさん並んでいると、その気持ちを忘れてしまいそうです」とユイが述べています。「もったいない」という気持ちも相まって、外食時が難関です。"
+},
+{
+  sec:3, secName:"語境判断",
+  stem:"腹八分目にすると体に良い理由として、対話で述べられていないものはどれですか？",
+  hint:"ハルキが挙げたメリットを三つ思い出してみましょう。",
+  opts:["食後の体が楽になる","消化に使うエネルギーが少なくて済む","眠くなりにくい","体重が確実に減る"],
+  ans:3,
+  explain:"ハルキが挙げたのは「食後が楽」「消化エネルギーが少ない」「眠くなりにくい」の三点。「体重が確実に減る」という断言はしていません。対話では体への優しさ・快適さが中心テーマです。"
+},
+{
+  sec:3, secName:"語境判断",
+  stem:"「一汁三菜」の正しい構成はどれですか？",
+  hint:"ハルキが「これにご飯がつくのが基本の形です」と説明しました。",
+  opts:["汁物2つ＋おかず3つ（ご飯なし）","ご飯＋汁物1つ＋主菜1つ＋副菜2つ","ご飯＋汁物1つ＋副菜3つ","汁物1つ＋主菜3つ（ご飯なし）"],
+  ans:1,
+  explain:"「『汁』は汁物一つ、『菜』は主菜一つと副菜二つ。これにご飯がつく」という説明より、ご飯＋汁物1＋主菜1＋副菜2が正解。「三菜」は主菜1＋副菜2の合計三品のことです。"
+},
+{
+  sec:3, secName:"語境判断",
+  stem:"ハルキが「一汁三菜の和食」を例えたのは次のうちどれですか？",
+  hint:"「大きなステーキだけのお皿」との対比で出てきた例えです。",
+  opts:["力強いソロ演奏","小さなオーケストラ","ジャズバンド","巨大なシンフォニーホール"],
+  ans:1,
+  explain:"「大きなステーキだけのお皿が力強いソロ演奏だとすると、一汁三菜の和食は小さなオーケストラみたいなもの」とハルキが例えました。小さいが全体で豊かな調和を生むイメージです。"
+},
+{
+  sec:3, secName:"語境判断",
+  stem:"日本の都市部で「意識せずに体を動かす」機会として対話で挙げられているものはどれですか？",
+  hint:"ハルキがユイに「今日、ここまでどうやって来ましたか？」と聞いた場面が出典です。",
+  opts:["毎朝のジョギング","週2回のジム通い","駅まで歩いたり駅構内で階段を使うこと","公園での定期的なウォーキング"],
+  ans:2,
+  explain:"「公共交通機関を使うと、駅まで歩き、駅の中でも階段を上り下りする。特別な運動をしなくても、毎日かなりの距離を歩いていることになる」とハルキが述べています。"
+},
+{
+  sec:3, secName:"語境判断",
+  stem:"「脳が満腹感を感じるまでには少し時間がかかる」という事実は、どんな行動を勧めるために述べられましたか？",
+  hint:"食べるスピードと満腹感の関係の話です。",
+  opts:["食事の前に水をたくさん飲むこと","ゆっくりよく噛んで食べること","毎日同じ時間に食事をとること","食事の量を細かく記録すること"],
+  ans:1,
+  explain:"「ゆっくりよく噛んで食べるようにすると、自然と腹八分目で満足できるようになる。時間をかけることで、脳が満腹感を感じる時間ができるから」というハルキの説明が根拠です。"
+},
+{
+  sec:3, secName:"語境判断",
+  stem:"「ちりも積もれば山となる」ということわざが使われたのはどんな文脈ですか？",
+  hint:"Page 5のユイの発言です。",
+  opts:["少しずつ食べすぎると体重が増えるという文脈","毎日の小さな活動の積み重ねが大きなカロリー消費につながるという文脈","日本食の種類がたくさんあるという文脈","体重を少しずつ減らしていくという文脈"],
+  ans:1,
+  explain:"ユイが「ちりも積もれば山となる」と言ったのは、「毎日の生活の中での小さな運動の積み重ねが実はとても大きい」というハルキの発言への応答として。小さな積み重ねが大きな結果を生む比喩です。"
+},
+{
+  sec:3, secName:"語境判断",
+  stem:"日本のコンビニ弁当について、対話ではどんな特徴が述べられていますか？",
+  hint:"Page 4のハルキの発言が出典です。",
+  opts:["量が多くてコスパが良い","色々なおかずが少しずつ入っているものが多い","ヘルシーな野菜中心のメニューが多い","洋食系のメニューが中心である"],
+  ans:1,
+  explain:"「コンビニのお弁当なんかでも、色々なおかずが少しずつ入っているものが多いでしょう？あのあたりにも、日本の食文化が反映されている」とハルキが述べています。一汁三菜の思想がコンビニにも生きているということです。"
+},
+{
+  sec:3, secName:"語境判断",
+  stem:"ユイが海外旅行で驚いたこととして対話で述べられているのはどれですか？",
+  hint:"Page 2でユイが「びっくりしますもん！」と言った場面が出典です。",
+  opts:["食材の種類の豊富さ","食事の値段の安さ","レストランで出てくるお皿の大きさ（一人前なのに量がすごい）","食事のスピードの速さ"],
+  ans:2,
+  explain:"「海外旅行に行くと、レストランで出てくるお皿の大きさにびっくりしますもん！一人前なのに、すごい量で」とユイが述べています。日本の小さなポーションサイズとの対比が話題の核心です。"
+},
+{
+  sec:3, secName:"語境判断",
+  stem:"この対話全体の結論として最もふさわしいものはどれですか？",
+  hint:"Page 5の最後のハルキとユイのやり取りを思い出してください。",
+  opts:["日本人は厳格なダイエットを継続しているから健康的","一つのすごい秘密ではなく、腹八分目・食事バランス・日常の活動量という小さな習慣の組み合わせが健康を支えている","日本食が世界一栄養バランスに優れているから","特別な運動プログラムを実践している人が多いから"],
+  ans:1,
+  explain:"「一つのすごい秘密があるんじゃなくて、色々な小さな習慣が組み合わさって、結果になっている」というユイの言葉と、「食事の内容と生活の活動量、この二つのバランスが理由」というハルキの言葉が対話全体の結論です。"
+}
+
+];
+
+// ══════════════════════════════════════════
+//  State
+// ══════════════════════════════════════════
+let cur=0, score=0, answered=[];
+const secScore={1:{c:0,t:0},2:{c:0,t:0},3:{c:0,t:0}};
+
+const $=s=>document.querySelector(s);
+const app=()=>$('#app');
+
+// ── HOME ──
+function renderHome(){
+  app().innerHTML=`
+    <div class="home">
+      <div class="home-title">減肥</div>
+      <div class="home-sub">語彙・文法・表達テスト</div>
+      <div class="sec-preview">
+        <div class="sec-row">
+          <span class="sec-badge s1">第一節</span>
+          <div class="sec-info">語彙理解 ／ 10問<br><b>対話中のキーワードの意味と用法を問います</b></div>
+        </div>
+        <div class="sec-row">
+          <span class="sec-badge s2">第二節</span>
+          <div class="sec-info">句型選択 ／ 10問<br><b>助詞・接続・文型の正しい使い方を確認します</b></div>
+        </div>
+        <div class="sec-row">
+          <span class="sec-badge s3">第三節</span>
+          <div class="sec-info">語境判断 ／ 10問<br><b>対話の内容理解と自然な表達力を試します</b></div>
+        </div>
+      </div>
+      <button class="start-btn" id="startBtn">テスト開始 ✿</button>
+    </div>`;
+  $('#startBtn').addEventListener('click', ()=>{
+    cur=0; score=0; answered=[];
+    secScore[1]={c:0,t:0}; secScore[2]={c:0,t:0}; secScore[3]={c:0,t:0};
+    renderQuiz();
+  });
+}
+
+// ── QUIZ ──
+function renderQuiz(){
+  const q=QUESTIONS[cur];
+  const pct=Math.round(cur/QUESTIONS.length*100);
+  const secClass='s'+q.sec;
+
+  app().innerHTML=`
+    <div class="quiz-wrap">
+      <div class="quiz-header">
+        <button class="quiz-back" id="qBack">← 首页</button>
+        <div class="quiz-prog-label">${cur+1} / ${QUESTIONS.length}</div>
+        <div class="quiz-score-label">✿ ${score}点</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:${pct}%"></div></div>
+      <div class="q-card" style="animation-delay:.05s">
+        <span class="q-sec-tag ${secClass}">第${q.sec}節 · ${q.secName}</span>
+        <div class="q-num">問 ${cur+1}</div>
+        <div class="q-stem">${q.stem}</div>
+        ${q.hint?`<div class="q-hint">💡 ${q.hint}</div>`:''}
+        <div class="q-options" id="opts">
+          ${q.opts.map((o,i)=>`
+            <button class="q-opt" data-idx="${i}">
+              <span class="opt-letter">${'ABCD'[i]}</span>${o}
+            </button>`).join('')}
+        </div>
+        <div id="explainBox"></div>
+      </div>
+      <div id="nextArea"></div>
+    </div>`;
+
+  $('#qBack').addEventListener('click', renderHome);
+
+  document.querySelectorAll('.q-opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.classList.contains('locked')) return;
+      const chosen=+btn.dataset.idx;
+      handleAnswer(chosen);
+    });
+  });
+}
+
+function handleAnswer(chosen){
+  const q=QUESTIONS[cur];
+  const isOk=(chosen===q.ans);
+
+  document.querySelectorAll('.q-opt').forEach(b=>{
+    b.classList.add('locked');
+    const idx=+b.dataset.idx;
+    if(idx===q.ans) b.classList.add('reveal');
+    if(idx===chosen && !isOk) b.classList.add('wrong');
+    if(idx===chosen && isOk){ b.classList.remove('reveal'); b.classList.add('correct'); }
+  });
+
+  if(isOk){ score++; secScore[q.sec].c++; }
+  secScore[q.sec].t++;
+  answered.push({qi:cur, chosen, ok:isOk});
+
+  $('#explainBox').innerHTML=`
+    <div class="explain-box">
+      <strong>${isOk?'✓ 正解！':'✗ 不正解'}</strong>　正解は<strong>「${'ABCD'[q.ans]}」${q.opts[q.ans]}</strong><br>
+      ${q.explain}
+    </div>`;
+
+  const isLast=(cur===QUESTIONS.length-1);
+  $('#nextArea').innerHTML=`<button class="next-btn" id="nextBtn">${isLast?'結果を見る →':'次の問題 →'}</button>`;
+  $('#nextBtn').addEventListener('click', ()=>{
+    if(isLast){ renderResult(); } else { cur++; renderQuiz(); }
+  });
+}
+
+// ── RESULT ──
+function renderResult(){
+  const pct=Math.round(score/QUESTIONS.length*100);
+  let e,t,s;
+  if(pct===100){e='🏆';t='完璧！';s='満点です！減肥マスターに認定！'}
+  else if(pct>=87){e='🌿';t='素晴らしい！';s='非常に高い理解度です。対話の内容が身についています。'}
+  else if(pct>=70){e='🌟';t='よくできました！';s='もう少しで完璧！苦手な句型をもう一度確認しましょう。'}
+  else if(pct>=53){e='👏';t='頑張りました！';s='基礎はOK。語彙と句型の用法をもう一度復習してみて。'}
+  else{e='💪';t='もう一度！';s='対話をゆっくり読み直してから、再チャレンジしてみましょう。'}
+
+  const secLabels={1:'語彙理解',2:'句型選択',3:'語境判断'};
+  const secColors={1:'s1',2:'s2',3:'s3'};
+
+  app().innerHTML=`
+    <div class="result">
+      <div class="result-emoji">${e}</div>
+      <div class="result-title">${t}</div>
+      <div class="result-sub">${s}</div>
+      <div class="result-box">
+        <div class="result-pct">${pct}%</div>
+        <div class="result-detail">${score} / ${QUESTIONS.length} 正解</div>
+      </div>
+      <div class="result-sec-breakdown">
+        ${[1,2,3].map(sec=>{
+          const ss=secScore[sec];
+          const sp=ss.t>0?Math.round(ss.c/ss.t*100):0;
+          return `<div class="sec-bar-row">
+            <div class="sec-bar-label" style="color:var(--sec${sec})">${secLabels[sec]}</div>
+            <div class="sec-bar-track"><div class="sec-bar-fill ${secColors[sec]}" style="width:${sp}%"></div></div>
+            <div class="sec-bar-score">${ss.c}/${ss.t}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="result-btns">
+        <button class="btn-primary" id="retryBtn">もう一度挑戦</button>
+        <button class="btn-secondary" id="reviewBtn">間違いを確認</button>
+      </div>
+    </div>`;
+
+  $('#retryBtn').addEventListener('click', ()=>{
+    cur=0; score=0; answered=[];
+    secScore[1]={c:0,t:0}; secScore[2]={c:0,t:0}; secScore[3]={c:0,t:0};
+    renderQuiz();
+  });
+  $('#reviewBtn').addEventListener('click', renderReview);
+}
+
+// ── REVIEW ──
+function renderReview(){
+  const rows=answered.map(({qi,chosen,ok})=>{
+    const q=QUESTIONS[qi];
+    return `
+      <div class="r-card ${ok?'r-ok':'r-ng'}" style="animation-delay:${qi*.03}s">
+        <div class="r-top">
+          <span class="r-icon">${ok?'✅':'❌'}</span>
+          <span class="q-sec-tag s${q.sec}" style="font-size:9px;padding:2px 8px">${q.secName}</span>
+        </div>
+        <div class="r-q-text"><b>問${qi+1}</b>　${q.stem}</div>
+        <div class="r-answer-row">
+          ${!ok?`<span class="r-your">あなた：${'ABCD'[chosen]} ${q.opts[chosen]}</span>`:''}
+          <span class="r-correct">正解：${'ABCD'[q.ans]} ${q.opts[q.ans]}</span>
+        </div>
+        <div class="r-explain">${q.explain}</div>
+      </div>`;
+  });
+
+  app().innerHTML=`
+    <div class="review-wrap">
+      <div class="review-header">
+        <button class="quiz-back" id="rBack">← 結果に戻る</button>
+        <div class="review-title">解答レビュー</div>
+        <div></div>
+      </div>
+      ${rows.join('')}
+    </div>`;
+
+  $('#rBack').addEventListener('click', renderResult);
+}
+
+renderHome();
+</script>
+</body>
+</html>
